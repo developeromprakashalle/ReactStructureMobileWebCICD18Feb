@@ -44,6 +44,12 @@ on:
         required: true
         default: '1.0.0'
         type: string
+      
+      WebAppVersion:
+        description: 'Web app version'
+        required: true
+        default: '1.0.0'
+        type: string
 
       SetEnvironment:
         description: 'Set Environment for the app'
@@ -222,6 +228,11 @@ jobs:
           cd web 
           npm run lint
       #- run: npx jest --coverage
+      - run: |
+          cd web
+          WEB_APP_VERSION=${{inputs.WebAppVersion}}  # Example: 1.0.1, 1.0.2...
+
+          sed -i "s/version [0-9]\+/version $WEB_APP_VERSION/" web/package.json
       - run: |
           cd web
           npm run build
