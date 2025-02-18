@@ -1,0 +1,224 @@
+
+name: Build React Native CI App
+#The workflow file is divided into the following sections:
+#name:  The name of the workflow.
+#on:  The event that triggers the workflow.
+#jobs:  The list of jobs that the workflow runs. Each job contains a series of steps that execute in order.
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Choose platform to build'
+        required: true
+        default: 'ANDROID'
+        type: choice
+        options:
+          - ANDROID
+          - IOS
+          - WEB
+
+      buildType:
+        description: 'Choose Android build type'
+        required: true
+        default: 'DEBUG'
+        type: choice
+        options:
+          - RELEASE
+          - DEBUG
+
+      AndroidVersionCode:
+        description: 'Android App version'
+        required: true
+        default: '1'
+        type: number
+
+      BuildVersion:
+        description: 'Build version'
+        required: true
+        default: '1.0.0'
+        type: string
+
+      IOSBundleVersion:
+        description: 'iOS Bundle version'
+        required: true
+        default: '1.0.0'
+        type: string
+
+      SetEnvironment:
+        description: 'Set Environment for the app'
+        required: true
+        default: 'DEV'
+        type: choice
+        options:
+          - DEV
+          - UAT
+          - PROD
+
+jobs:
+  android-build:
+    if: ${{ inputs.platform == 'ANDROID' }}
+    name: Build Android APK
+    #virtual machine (runner) ubuntu-latest Default, recommended for most workflows where your job will execute.
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set Android Version
+        run: |
+          VERSION_CODE=${{inputs.AndroidVersionCode}}  # Example: 1, 2, 3...
+          VERSION_NAME=${{inputs.BuildVersion}}  # Example: 1.0.1, 1.0.2...
+
+          sed -i "s/versionCode [0-9]\+/versionCode $VERSION_CODE/" android/app/build.gradle
+          sed -i 's/versionName "[0-9\.]*"/versionName "'"$VERSION_NAME"'"/' android/app/build.gradle
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22' # Ensure Node.js is compatible with your React Native version
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'adopt'
+          java-version: '17'
+          # Ensure JDK is compatible with your React Native version
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Print Versions
+        run: |
+          echo "node -v"
+          node -v
+          echo "npm -v"
+          npm -v  
+          echo "java -version"
+          java -version
+          echo "gradle -v"
+          gradle -v
+
+      #- name: Lint Code
+      #  run: npm run lint
+
+      #- name: Run Jest Tests with Coverage
+      #  run: npx jest --coverage
+
+      #- name: Run SonarQube Scanner
+      #  run: npx sonar-scanner
+      #  env:
+      #    SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Grant Execute Permission to Gradle Wrapper
+        run: chmod +x android/gradlew
+
+      - name: Build DEBUG Android APK
+        if: inputs.buildType == 'DEBUG'
+        run: |
+          cd android 
+          ./gradlew assembleDebug bundleDebug
+
+      - name: Rename DEBUG APK
+        if: inputs.buildType == 'DEBUG'
+        run: mv android/app/build/outputs/apk/debug/app-debug.apk android/app/build/outputs/apk/debug/app.apk
+
+      - name: Publish DEBUG Artifact for Android
+        if: inputs.buildType == 'DEBUG'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ReactNativeCICD-Debug
+          path: |
+            android/app/build/outputs/apk/debug/app.apk
+
+      - name: Build RELEASE Android APK
+        if: inputs.buildType == 'RELEASE'
+        run: |
+          cd android 
+          ./gradlew assembleRelease bundleRelease
+
+      - name: Rename RELEASE APK
+        if: inputs.buildType == 'RELEASE'
+        run: mv android/app/build/outputs/apk/release/app-release.apk android/app/build/outputs/apk/release/app.apk
+
+      - name: Publish RELEASE Artifact for Android
+        if: inputs.buildType == 'RELEASE'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ReactNativeCICD-Release
+          path: |
+            android/app/build/outputs/apk/release/app.apk
+
+  build-ios:
+    if: ${{ inputs.platform == 'IOS' }}
+    name: Build iOS App
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install CocoaPods
+        run: |
+          cd ios
+          pod install
+
+      #- name: Update iOS Bundle Version
+      #  run: |
+      #   /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString 1.2.0" "ios/JSCICD/Info.plist"
+      #   /usr/libexec/PlistBuddy -c "Set :CFBundleVersion 45" "ios/JSCICD/Info.plist"
+      #    /usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier com.mobiletest.test" "ios/JSCICD/Info.plist"
+
+      - name: Build iOS App
+        env:
+          DEVELOPER_DIR: /Applications/Xcode.app/Contents/Developer
+        run: |
+          cd ios
+          xcodebuild -workspace JSCICD.xcworkspace \
+                     -scheme JSCICD \
+                     -sdk iphoneos \
+                     -configuration Release \
+                     -archivePath ./build/JSCICD.xcarchive archive
+
+      - name: Export IPA
+        run: |
+          cd ios
+          xcodebuild -exportArchive \
+                     -archivePath ./build/JSCICD.xcarchive \
+                     -exportOptionsPlist exportOptions.plist \
+                     -exportPath ./build
+                     DEVELOPMENT_TEAM=YOUR_TEAM_ID # Add your team ID
+
+      - name: Upload iOS Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-build
+          path: ios/build/SampleRNJS.ipa
+  build-web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - run: npm run lint
+      - run: npx jest --coverage
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ReactWebViteBuild
+          path: dist
+          retention-days: 10
