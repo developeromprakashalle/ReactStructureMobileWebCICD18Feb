@@ -243,5 +243,5 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: ReactNativeWebBuild
-          path: dist
+          path: web/dist
           retention-days: 10
