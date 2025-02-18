@@ -227,12 +227,15 @@ jobs:
       - run: |
           cd web 
           npm run lint
+      - name: Install jq
+        run: sudo apt-get install jq  
+      - name: Update package.json version
+        run: |
+          NEW_VERSION=${{inputs.WebAppVersion}}
+          jq --arg ver "$NEW_VERSION" '.version = $ver' package.json > temp.json && mv temp.json package.json
+          echo "Updated package.json version to $NEW_VERSION"
+        
       #- run: npx jest --coverage
-      - run: |
-          cd web
-          WEB_APP_VERSION=${{inputs.WebAppVersion}}  # Example: 1.0.1, 1.0.2...
-
-          sed -i "s/version [0-9]\+/version $WEB_APP_VERSION/" web/package.json
       - run: |
           cd web
           npm run build
