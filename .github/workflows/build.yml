@@ -224,6 +224,7 @@ jobs:
       - run: |
           cd web
           npm install
+          npm install -g typescript
       - run: |
           cd web 
           npm run lint
