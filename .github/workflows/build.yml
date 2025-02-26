@@ -192,20 +192,20 @@ jobs:
           DEVELOPER_DIR: /Applications/Xcode.app/Contents/Developer
         run: |
           cd ios
-          xcodebuild -workspace JSCICD.xcworkspace \
-                     -scheme JSCICD \
+          xcodebuild -workspace adbReactMIB.xcworkspace \
+                     -scheme adbReactMIB \
                      -sdk iphoneos \
                      -configuration Release \
-                     -archivePath ./build/JSCICD.xcarchive archive
+                     -archivePath ./build/adbReactMIB.xcarchive archive
 
       - name: Export IPA
         run: |
           cd ios
           xcodebuild -exportArchive \
-                     -archivePath ./build/JSCICD.xcarchive \
+                     -archivePath ./build/adbReactMIB.xcarchive \
                      -exportOptionsPlist exportOptions.plist \
                      -exportPath ./build
-                     DEVELOPMENT_TEAM=YOUR_TEAM_ID # Add your team ID
+                     DEVELOPMENT_TEAM='9A6RGJ43ZH'
 
       - name: Upload iOS Build
         uses: actions/upload-artifact@v4
