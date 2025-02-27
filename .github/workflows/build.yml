@@ -188,47 +188,45 @@ jobs:
       #    /usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier com.mobiletest.test" "ios/JSCICD/Info.plist"
 
       - name: Set Up Signing Credentials
-      env:
-        APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}  # Base64-encoded p12 file
-        CERTIFICATE_PASSWORD: ${{ secrets.CERTIFICATE_PASSWORD }}
-        PROVISIONING_PROFILE: ${{ secrets.PROVISIONING_PROFILE }}  # Base64-encoded .mobileprovision file
-      run: |
-        echo "$APPLE_CERTIFICATE" | base64 --decode > certificate.p12
-        security import certificate.p12 -P "$CERTIFICATE_PASSWORD" -A
-        security create-keychain -p "" build.keychain
-        security default-keychain -s build.keychain
-        security unlock-keychain -p "" build.keychain
-        security set-keychain-settings -t 3600 -l build.keychain
-        security list-keychains -s build.keychain
-        echo "$PROVISIONING_PROFILE" | base64 --decode > profile.mobileprovision
-        mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-        mv profile.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
-        
-      - name: Build iOS App
         env:
-          DEVELOPER_DIR: /Applications/Xcode.app/Contents/Developer
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}  # Base64-encoded p12 file
+          CERTIFICATE_PASSWORD: ${{ secrets.CERTIFICATE_PASSWORD }}
+          PROVISIONING_PROFILE: ${{ secrets.PROVISIONING_PROFILE }}  # Base64-encoded .mobileprovision file
         run: |
-          cd ios
-          xcodebuild -workspace adbReactMIB.xcworkspace \
-                     -scheme adbReactMIB \
-                     -sdk iphoneos \
-                     -configuration Release \
-                     -archivePath ./build/adbReactMIB.xcarchive archive
-
+          echo "$APPLE_CERTIFICATE" | base64 --decode > certificate.p12
+          security import certificate.p12 -P "$CERTIFICATE_PASSWORD" -A
+          security create-keychain -p "" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "" build.keychain
+          security set-keychain-settings -t 3600 -l build.keychain
+          security list-keychains -s build.keychain
+          echo "$PROVISIONING_PROFILE" | base64 --decode > profile.mobileprovision
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          mv profile.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
+        
+      - name: Archive App
+        run: |
+            xcodebuild clean archive \
+              -workspace adbReactMIB.xcworkspace \
+              -scheme adbReactMIB \
+              -sdk iphoneos \
+              -configuration Release \
+              -archivePath build/adbReactMIB.xcarchive \
+              CODE_SIGN_STYLE=Manual \
+              PROVISIONING_PROFILE_SPECIFIER="MyProvisioningProfile"
+  
       - name: Export IPA
         run: |
-          cd ios
-          xcodebuild -exportArchive \
-                     -archivePath ./build/adbReactMIB.xcarchive \
-                     -exportOptionsPlist exportOptions.plist \
-                     -exportPath ./build
-                     DEVELOPMENT_TEAM='9A6RGJ43ZH'
+            xcodebuild -exportArchive \
+              -archivePath build/adbReactMIB.xcarchive \
+              -exportPath build/export \
+              -exportOptionsPlist ExportOptions.plist
 
       - name: Upload iOS Build
         uses: actions/upload-artifact@v4
         with:
           name: ios-build
-          path: ios/build/SampleRNJS.ipa
+          path: ios/build/adbReactMIB.ipa
   build-web:
     if: ${{ inputs.platform == 'WEB' }}
     name: Build WEB APP
