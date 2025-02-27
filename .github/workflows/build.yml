@@ -197,6 +197,7 @@ jobs:
         
       - name: Archive App
         run: |
+          cd ios
             xcodebuild clean archive \
               -workspace adbReactMIB.xcworkspace \
               -scheme adbReactMIB \
@@ -209,6 +210,7 @@ jobs:
   
       - name: Export IPA
         run: |
+         cd ios
             xcodebuild -exportArchive \
               -archivePath build/adbReactMIB.xcarchive \
               -exportPath build/export \
