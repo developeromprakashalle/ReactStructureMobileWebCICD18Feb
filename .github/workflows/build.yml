@@ -187,6 +187,23 @@ jobs:
       #   /usr/libexec/PlistBuddy -c "Set :CFBundleVersion 45" "ios/JSCICD/Info.plist"
       #    /usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier com.mobiletest.test" "ios/JSCICD/Info.plist"
 
+      - name: Set Up Signing Credentials
+      env:
+        APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}  # Base64-encoded p12 file
+        CERTIFICATE_PASSWORD: ${{ secrets.CERTIFICATE_PASSWORD }}
+        PROVISIONING_PROFILE: ${{ secrets.PROVISIONING_PROFILE }}  # Base64-encoded .mobileprovision file
+      run: |
+        echo "$APPLE_CERTIFICATE" | base64 --decode > certificate.p12
+        security import certificate.p12 -P "$CERTIFICATE_PASSWORD" -A
+        security create-keychain -p "" build.keychain
+        security default-keychain -s build.keychain
+        security unlock-keychain -p "" build.keychain
+        security set-keychain-settings -t 3600 -l build.keychain
+        security list-keychains -s build.keychain
+        echo "$PROVISIONING_PROFILE" | base64 --decode > profile.mobileprovision
+        mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+        mv profile.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
+        
       - name: Build iOS App
         env:
           DEVELOPER_DIR: /Applications/Xcode.app/Contents/Developer
