@@ -186,14 +186,36 @@ jobs:
       #   /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString 1.2.0" "ios/JSCICD/Info.plist"
       #   /usr/libexec/PlistBuddy -c "Set :CFBundleVersion 45" "ios/JSCICD/Info.plist"
       #    /usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier com.mobiletest.test" "ios/JSCICD/Info.plist"
-
-      - name: Decode and Install Provisioning Profile
+      
+      - name: Install the apple certificate and proviosioning profile
         env:
-          PROVISIONING_PROFILE: ${{ secrets.PROVISIONING_PROFILE }}
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
         run: |
-          echo "$PROVISIONING_PROFILE" | base64 --decode > profile.mobileprovision
+         #create variable
+          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+          PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+
+          # import certificate and provisioning profile from secrets
+          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+          echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode -o $PP_PATH
+
+          # create temporary keychain
+          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+
+    # import certificate to keychain
+          security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security list-keychain -d user -s $KEYCHAIN_PATH
+
+    # apply provisioning profile
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          mv profile.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
+          cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
         
       - name: Archive App
         run: |
@@ -202,11 +224,13 @@ jobs:
               -workspace adbReactMIB.xcworkspace \
               -scheme adbReactMIB \
               -sdk iphoneos \
-              -configuration Release \
-              -archivePath build/adbReactMIB.xcarchive \
-              CODE_SIGN_STYLE=Manual \
-              DEVELOPMENT_TEAM="9A6RGJ43ZH" \
-              PROVISIONING_PROFILE_SPECIFIER="Profile_For_React_Native_POC : com.mahesh.SampleAppCICD"
+              -archivePath ${{ github.workspace }}/build/adbReactMIB.xcarchive \
+               archive
+#              -configuration Release \
+#              -archivePath build/adbReactMIB.xcarchive \
+#CODE_SIGN_STYLE=Manual \
+#DEVELOPMENT_TEAM="9A6RGJ43ZH" \
+#PROVISIONING_PROFILE_SPECIFIER="Profile_For_React_Native_POC : com.mahesh.SampleAppCICD"
   
       - name: Export IPA
         run: |
