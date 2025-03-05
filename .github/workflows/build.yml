@@ -178,12 +178,12 @@ jobs:
     #          rm -rf ~/Library/Developer/Xcode/DerivedData
     #          sudo xcodebuild -alltargets clean
       
-      - name: Increase Swap Memory (macOS)
-        run: |
-            sudo dd if=/dev/zero of=/swapfile bs=1g count=8
-            sudo chmod 600 /swapfile
-            sudo mkswap /swapfile
-            sudo swapon /swapfile || echo "Swap activation failed, but continuing"
+    #  - name: Increase Swap Memory (macOS)
+    #    run: |
+    #        sudo dd if=/dev/zero of=/swapfile bs=1g count=8
+    #        sudo chmod 600 /swapfile
+    #        sudo mkswap /swapfile
+    #        sudo swapon /swapfile || echo "Swap activation failed, but continuing"
   
 
       - name: Install dependencies
