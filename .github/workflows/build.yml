@@ -164,7 +164,6 @@ jobs:
     name: Build iOS App
     runs-on: macos-latest
     
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -173,6 +172,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          
+      - name: Clean Xcode Derived Data
+        run: |
+              rm -rf ~/Library/Developer/Xcode/DerivedData
+              sudo xcodebuild -alltargets clean
       
       - name: Increase swap memory
         run: |
@@ -180,7 +184,6 @@ jobs:
             sudo chmod 600 /swapfile
             sudo mkswap /swapfile
             sudo swapon /swapfile
-        
 
       - name: Install dependencies
         run: npm install
