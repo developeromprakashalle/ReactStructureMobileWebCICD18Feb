@@ -236,9 +236,9 @@ jobs:
         run: |
          cd ios
             xcodebuild -exportArchive \
-              -archivePath build/adbReactMIB.xcarchive \
+              -archivePath /build/adbReactMIB.xcarchive \
               -exportPath build/export \
-              -exportOptionsPlist ExportOptions.plist
+              -exportOptionsPlist exportOptions.plist
 
       - name: Upload iOS Build
         uses: actions/upload-artifact@v4
