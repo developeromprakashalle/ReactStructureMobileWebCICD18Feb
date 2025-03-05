@@ -163,6 +163,7 @@ jobs:
     if: ${{ inputs.platform == 'IOS' }}
     name: Build iOS App
     runs-on: macos-latest
+    
 
     steps:
       - name: Checkout code
@@ -172,6 +173,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+      
+      - name: Increase swap memory
+        run: |
+            sudo fallocate -l 8G /swapfile
+            sudo chmod 600 /swapfile
+            sudo mkswap /swapfile
+            sudo swapon /swapfile
+        
 
       - name: Install dependencies
         run: npm install
@@ -179,7 +188,7 @@ jobs:
       - name: Install CocoaPods
         run: |
           cd ios
-          pod install
+          pod install --repo-update
 
       #- name: Update iOS Bundle Version
       #  run: |
