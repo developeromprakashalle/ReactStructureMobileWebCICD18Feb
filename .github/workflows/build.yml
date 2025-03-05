@@ -173,10 +173,10 @@ jobs:
         with:
           node-version: 22
           
-      - name: Clean Xcode Derived Data
-        run: |
-              rm -rf ~/Library/Developer/Xcode/DerivedData
-              sudo xcodebuild -alltargets clean
+    #  - name: Clean Xcode Derived Data
+    #    run: |
+    #          rm -rf ~/Library/Developer/Xcode/DerivedData
+    #          sudo xcodebuild -alltargets clean
       
       - name: Increase swap memory
         run: |
