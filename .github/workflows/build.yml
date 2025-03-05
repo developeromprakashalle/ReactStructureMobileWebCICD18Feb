@@ -162,8 +162,7 @@ jobs:
   build-ios:
     if: ${{ inputs.platform == 'IOS' }}
     name: Build iOS App
-    runs-on: macos-13.0
-      #macos-latest
+    runs-on: macos-latest
     
     steps:
       - name: Checkout code
