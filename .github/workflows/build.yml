@@ -235,8 +235,9 @@ jobs:
       - name: Export IPA
         run: |
          cd ios
+            mkdir -p build/export
             xcodebuild -exportArchive \
-              -archivePath /build/adbReactMIB.xcarchive \
+              -archivePath ${{ github.workspace }}/build/adbReactMIB.xcarchive \
               -exportPath build/export \
               -exportOptionsPlist exportOptions.plist
 
@@ -244,7 +245,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ios-build
-          path: ios/build/adbReactMIB.ipa
+          path: ios/build/export/adbReactMIB.ipa
   build-web:
     if: ${{ inputs.platform == 'WEB' }}
     name: Build WEB APP
