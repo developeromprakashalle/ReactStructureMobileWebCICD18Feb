@@ -178,12 +178,13 @@ jobs:
     #          rm -rf ~/Library/Developer/Xcode/DerivedData
     #          sudo xcodebuild -alltargets clean
       
-      - name: Increase swap memory
+      - name: Increase Swap Memory (macOS)
         run: |
-            sudo fallocate -l 8G /swapfile
+            sudo dd if=/dev/zero of=/swapfile bs=1g count=8
             sudo chmod 600 /swapfile
             sudo mkswap /swapfile
-            sudo swapon /swapfile
+            sudo swapon /swapfile || echo "Swap activation failed, but continuing"
+  
 
       - name: Install dependencies
         run: npm install
@@ -237,7 +238,7 @@ jobs:
               -scheme adbReactMIB \
               -sdk iphoneos \
               -archivePath ${{ github.workspace }}/build/adbReactMIB.xcarchive \
-               archive
+               archive -verbose
 #              -configuration Release \
 #              -archivePath build/adbReactMIB.xcarchive \
 #CODE_SIGN_STYLE=Manual \
