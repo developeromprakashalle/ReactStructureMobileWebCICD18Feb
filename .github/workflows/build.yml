@@ -252,8 +252,7 @@ jobs:
             xcodebuild -exportArchive \
               -archivePath ${{ github.workspace }}/build/adbReactMIB.xcarchive \
               -exportPath build/export \
-              -exportOptionsPlist exportOptions.plist \
-              -jobs 1
+              -exportOptionsPlist exportOptions.plist
 
       - name: Upload iOS Build
         uses: actions/upload-artifact@v4

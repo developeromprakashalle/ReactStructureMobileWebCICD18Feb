@@ -5,8 +5,26 @@
         <key>method</key>
         <string>debugging</string>
         <key>teamID</key>
-        <string>B59DM7KYYD</string>
+        <string>9A6RGJ43ZH</string>
         <key>compileBitcode</key>
         <false/>
+        <key>uploadSymbols</key>
+        <true/>
+        <key>uploadBitcode</key>
+        <false/>
+        <key>signingStyle</key>
+        <string>manual</string>
+        <key>signingIdentity</key>
+        <string>iPhone Developer: Shravan Nitta (B59DM7KYYD)</string>
+        <key>signingCertificate</key>
+        <string>iPhone Developer: Shravan Nitta (B59DM7KYYD)</string>
+        <key>provisioningStyle</key>
+        <string>manual</string>
+        <key>provisioningProfiles</key>
+        <dict>
+            <key>com.mahesh.mib</key>
+            <string>f06c1744-f5af-4046-b4a6-577792c95ea2</string>
+        </dict>
+
     </dict>
 </plist>
