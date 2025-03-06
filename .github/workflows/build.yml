@@ -172,19 +172,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          
-    #  - name: Clean Xcode Derived Data
-    #    run: |
-    #          rm -rf ~/Library/Developer/Xcode/DerivedData
-    #          sudo xcodebuild -alltargets clean
-      
-    #  - name: Increase Swap Memory (macOS)
-    #    run: |
-    #        sudo dd if=/dev/zero of=/swapfile bs=1g count=8
-    #        sudo chmod 600 /swapfile
-    #        sudo mkswap /swapfile
-    #        sudo swapon /swapfile || echo "Swap activation failed, but continuing"
-  
 
       - name: Install dependencies
         run: npm install
@@ -193,12 +180,6 @@ jobs:
         run: |
           cd ios
           pod install --repo-update
-
-      #- name: Update iOS Bundle Version
-      #  run: |
-      #   /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString 1.2.0" "ios/JSCICD/Info.plist"
-      #   /usr/libexec/PlistBuddy -c "Set :CFBundleVersion 45" "ios/JSCICD/Info.plist"
-      #    /usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier com.mobiletest.test" "ios/JSCICD/Info.plist"
       
       - name: Install the apple certificate and proviosioning profile
         env:
@@ -207,7 +188,7 @@ jobs:
           BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
         run: |
-         #create variable
+          # create variable
           CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
           PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
           KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
@@ -239,11 +220,6 @@ jobs:
               -sdk iphoneos \
               -archivePath ${{ github.workspace }}/build/adbReactMIB.xcarchive \
                archive -verbose
-#              -configuration Release \
-#              -archivePath build/adbReactMIB.xcarchive \
-#CODE_SIGN_STYLE=Manual \
-#DEVELOPMENT_TEAM="9A6RGJ43ZH" \
-#PROVISIONING_PROFILE_SPECIFIER="Profile_For_React_Native_POC : com.mahesh.SampleAppCICD"
   
       - name: Export IPA
         run: |
@@ -259,6 +235,7 @@ jobs:
         with:
           name: ios-build
           path: ios/build/export/adbReactMIB.ipa
+
   build-web:
     if: ${{ inputs.platform == 'WEB' }}
     name: Build WEB APP
