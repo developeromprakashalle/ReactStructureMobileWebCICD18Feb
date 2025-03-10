@@ -214,7 +214,7 @@ jobs:
       - name: Archive App
         run: |
           cd ios
-            xcodebuild clean archive \
+            xcodebuild clean archive \ 
               -workspace adbReactMIB.xcworkspace \
               -scheme adbReactMIB \
               -sdk iphoneos \
