@@ -17,6 +17,7 @@ on:
           - ANDROID
           - IOS
           - WEB
+          
 
       buildType:
         description: 'Choose Android build type'
