@@ -22,11 +22,11 @@ on:
       buildType:
         description: 'Choose Android build type'
         required: true
-        default: 'DEBUG'
+        default: 'Debug'
         type: choice
         options:
-          - RELEASE
-          - DEBUG
+          - Release
+          - Debug
 
       AndroidVersionCode:
         description: 'Android App version'
@@ -63,15 +63,38 @@ on:
           - PROD
 
 jobs:
+  setup:
+    name: Setup Environment
+    runs-on: ubuntu-latest
+    outputs:
+      node_version: 22
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Print Versions
+        run: |
+          echo "Node.js: $(node -v)"
+          echo "NPM: $(npm -v)"
+          echo "Java: $(java -version)"
+          echo "Gradle: $(gradle -v)"
+
   android-build:
+    needs: setup
     if: ${{ inputs.platform == 'ANDROID' }}
     name: Build Android APK
     #virtual machine (runner) ubuntu-latest Default, recommended for most workflows where your job will execute.
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
 
       - name: Set Android Version
         run: |
@@ -80,14 +103,6 @@ jobs:
 
           sed -i "s/versionCode [0-9]\+/versionCode $VERSION_CODE/" android/app/build.gradle
           sed -i 's/versionName "[0-9\.]*"/versionName "'"$VERSION_NAME"'"/' android/app/build.gradle
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22' # Ensure Node.js is compatible with your React Native version
-
-      - name: Install Dependencies
-        run: npm install
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -98,17 +113,6 @@ jobs:
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
-
-      - name: Print Versions
-        run: |
-          echo "node -v"
-          node -v
-          echo "npm -v"
-          npm -v  
-          echo "java -version"
-          java -version
-          echo "gradle -v"
-          gradle -v
 
       #- name: Lint Code
       #  run: npm run lint
@@ -124,59 +128,29 @@ jobs:
       - name: Grant Execute Permission to Gradle Wrapper
         run: chmod +x android/gradlew
 
-      - name: Build DEBUG Android APK
-        if: inputs.buildType == 'DEBUG'
+      - name: Build Android APK
         run: |
-          cd android 
-          ./gradlew assembleDebug bundleDebug
+          cd android
+          ./gradlew assemble${{ inputs.buildType }} bundle${{ inputs.buildType }}
 
-      - name: Rename DEBUG APK
-        if: inputs.buildType == 'DEBUG'
-        run: mv android/app/build/outputs/apk/debug/app-debug.apk android/app/build/outputs/apk/debug/app.apk
+      - name: Rename APK
+        run: |
+          mv android/app/build/outputs/apk/${{ inputs.buildType }}/app-${{ inputs.buildType }}.apk android/app/build/outputs/apk/${{ inputs.buildType }}/app.apk
 
-      - name: Publish DEBUG Artifact for Android
-        if: inputs.buildType == 'DEBUG'
+      - name: Publish Android Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ReactNativeCICD-Debug
-          path: |
-            android/app/build/outputs/apk/debug/app.apk
+          name: ReactNativeCICD-${{ inputs.buildType }}
+          path: android/app/build/outputs/apk/${{ inputs.buildType }}/app.apk
 
-      - name: Build RELEASE Android APK
-        if: inputs.buildType == 'RELEASE'
-        run: |
-          cd android 
-          ./gradlew assembleRelease bundleRelease
-
-      - name: Rename RELEASE APK
-        if: inputs.buildType == 'RELEASE'
-        run: mv android/app/build/outputs/apk/release/app-release.apk android/app/build/outputs/apk/release/app.apk
-
-      - name: Publish RELEASE Artifact for Android
-        if: inputs.buildType == 'RELEASE'
-        uses: actions/upload-artifact@v4
-        with:
-          name: ReactNativeCICD-Release
-          path: |
-            android/app/build/outputs/apk/release/app.apk
 
   build-ios:
+    needs: setup
     if: ${{ inputs.platform == 'IOS' }}
     name: Build iOS App
     runs-on: macos-latest
     
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Install dependencies
-        run: npm install
-
       - name: Install CocoaPods
         run: |
           cd ios
@@ -238,23 +212,23 @@ jobs:
           path: ios/build/export/adbReactMIB.ipa
 
   build-web:
+    needs: setup
     if: ${{ inputs.platform == 'WEB' }}
     name: Build WEB APP
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - run: |
+      - name: Install Dependencies
+        run: |
           cd web
           npm install
           npm install -g typescript
+          
       - run: |
           cd web 
           npm run lint
       - name: Install jq
         run: sudo apt-get install jq  
+
       - name: Update package.json version
         run: |
           NEW_VERSION=${{inputs.WebAppVersion}}
@@ -262,6 +236,9 @@ jobs:
           echo "Updated package.json version to $NEW_VERSION"
         
       #- run: npx jest --coverage
+      - name: Clean Web Build Directory
+        run: rm -rf web/dist
+
       - run: |
           cd web
           npm run build
