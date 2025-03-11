@@ -259,6 +259,7 @@ jobs:
 
       - name: Install jq
         run: |
+          cd web
           sudo apt update
           sudo apt-get install jq
 
