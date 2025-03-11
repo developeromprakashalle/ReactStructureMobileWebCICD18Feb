@@ -71,6 +71,9 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          submodules: true  # Ensure all submodules are pulled
+          fetch-depth: 0     # Fetch full history for versioning
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -222,7 +225,7 @@ jobs:
           cd web
           npm install
           npm install -g typescript
-          
+
       - run: |
           cd web 
           npm run lint
