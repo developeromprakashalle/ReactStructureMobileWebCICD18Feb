@@ -85,6 +85,7 @@ jobs:
           echo "REPO_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
 
   android-build:
+    needs: setupEnv
     if: ${{ github.event.inputs.platform == 'ANDROID' }}
     name: Build Android APK
     runs-on: ubuntu-latest
