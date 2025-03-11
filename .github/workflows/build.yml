@@ -137,6 +137,10 @@ jobs:
       - name: Verify Workspace Integrity
         run: ls -la && ls -R android/app || echo "android/app directory does not exist"
       
+      - name: Build Web App
+        run: |
+          cd web
+          npm install
 
       - name: Set Android Version
         run: |
@@ -250,10 +254,10 @@ jobs:
           name: reactnative-workspace
           path: .
 
-     # - name: Build Web App
-        #run: |
-          #cd web
-          #npm install
+      - name: Build Web App
+        run: |
+          cd web
+          npm install
           #npm install -g typescript
           #npm run lint
 
