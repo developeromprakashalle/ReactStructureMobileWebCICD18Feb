@@ -66,7 +66,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
       
       # - name: Ensure React Native CLI is Installed
       #   run: |
@@ -78,21 +78,19 @@ jobs:
   
   
       - name: Install Dependencies
-        run: |
-            rm -rf node_modules package-lock.json
-            npm install
+        run: npm install
   
-      - name: Run React Native Autolinking
-        run: |
-              cd android
-              npx --yes @react-native-community/cli config || echo "Autolinking failed"
-              cd ..
+      # - name: Run React Native Autolinking
+      #   run: |
+      #         cd android
+      #         npx --yes @react-native-community/cli config || echo "Autolinking failed"
+      #         cd ..
 
       - name: Install Java
         uses: actions/setup-java@v4
         with:
               distribution: 'adopt'
-              java-version: '21'
+              java-version: '17'
 
    #   - name: Setup Gradle
          #uses: gradle/actions/setup-gradle@v3
@@ -136,11 +134,6 @@ jobs:
           path: .
       - name: Verify Workspace Integrity
         run: ls -la && ls -R android/app || echo "android/app directory does not exist"
-      
-      - name: Build Web App
-        run: |
-          cd web
-          npm install
 
       - name: Set Android Version
         run: |
@@ -152,6 +145,7 @@ jobs:
 
       - name: Build Android APK
         run: |
+          npm install
           cd android
           ./gradlew assemble${{ inputs.buildType }} bundle${{ inputs.buildType }}
 
