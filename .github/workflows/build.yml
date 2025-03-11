@@ -15,11 +15,11 @@ on:
       buildType:
         description: 'Choose Android build type'
         required: true
-        default: 'Debug'
+        default: 'debug'
         type: choice
         options:
-          - Release
-          - Debug
+          - release
+          - debug
       AndroidVersionCode:
         description: 'Android App version'
         required: true
