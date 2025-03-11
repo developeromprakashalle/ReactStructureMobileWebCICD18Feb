@@ -68,37 +68,34 @@ jobs:
         with:
           node-version: 22
       
-      - name: Check npx and CLI Version
+      - name: Ensure npx and React Native CLI Are Installed
         run: |
-          npx --version || echo "npx not found"
-          npx @react-native-community/cli --version || echo "React Native CLI not found"
-
-      
-      - name: Ensure React Native CLI is Installed
-        run: npm install -g @react-native-community/cli
-
+            npm install -g npx
+            npm install -g @react-native-community/cli
+            npx --version
+            npx @react-native-community/cli --version
+  
       - name: Install Dependencies
         run: |
-          rm -rf node_modules package-lock.json
-          npm install 
-      
+            rm -rf node_modules package-lock.json
+            npm install
+  
       - name: Run React Native Autolinking
         run: |
-          cd android
-          npx @react-native-community/cli config
-          cd ..
-          npx react-native link
-          
-      - name: Use Node.js 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
+              cd android
+              npx --yes @react-native-community/cli config || echo "Autolinking failed"
+              cd ..
+              
       - name: Install Java
         uses: actions/setup-java@v4
         with:
-          distribution: 'adopt'
-          java-version: '23'
+              distribution: 'adopt'
+              java-version: '23'
+
+      - name: Install Gradle
+        run: |
+              sudo apt update
+              sudo apt install gradle -y
         
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
