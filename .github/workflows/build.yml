@@ -68,18 +68,30 @@ jobs:
         with:
           node-version: 22
       
+      - name: Check npx and CLI Version
+        run: |
+          npx --version || echo "npx not found"
+          npx @react-native-community/cli --version || echo "React Native CLI not found"
+
+      
       - name: Ensure React Native CLI is Installed
         run: npm install -g @react-native-community/cli
 
       - name: Install Dependencies
-        run: npm install --legacy-peer-deps
-      
-      - name: Run React Native Autolinking
         run: |
-          cd android
-          npx @react-native-community/cli config
-          cd ..
+          rm -rf node_modules package-lock.json
+          npm install 
       
+      #- name: Run React Native Autolinking
+      #  run: |
+      #    cd android
+      #    npx @react-native-community/cli config
+      #    cd ..
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
       - name: Install Java
         uses: actions/setup-java@v4
         with:
