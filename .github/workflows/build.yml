@@ -81,7 +81,8 @@ jobs:
 
       - name: Get Repository Name
         id: get_repo_name
-        run: echo "::set-output name=REPO_NAME::${GITHUB_REPOSITORY##*/}"  
+        run: |
+          echo "REPO_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
 
   android-build:
     needs: setupEnv
