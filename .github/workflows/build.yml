@@ -85,13 +85,11 @@ jobs:
           echo "REPO_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
 
   android-build:
-    needs: setupEnv
     if: ${{ github.event.inputs.platform == 'ANDROID' }}
     name: Build Android APK
     runs-on: ubuntu-latest
     env:
-      REPO_NAME: ${{ needs.setupEnv.outputs.repository_name }}
-
+      REPO_NAME: ${{ github.event.inputs.repository_name }}
     steps:
       - name: Print Repository Name
         run: echo $REPO_NAME
@@ -100,7 +98,7 @@ jobs:
         run: |
           if [ -f "android/app/build.gradle" ]; then
             sed -i "s/versionCode [0-9]\+/versionCode ${{ inputs.AndroidVersionCode }}/" android/app/build.gradle
-            sed -i 's/versionName "[0-9\.]*"/versionName "'"${{ inputs.BuildVersion }}"'"/' android/app/build.gradle
+            sed -i "s/versionName "[0-9\.]*/versionName ${{ inputs.BuildVersion }}/" android/app/build.gradle
           else
             echo "Error: android/app/build.gradle not found!"
             exit 1
