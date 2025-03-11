@@ -67,12 +67,18 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+      
+      - name: Ensure React Native CLI is Installed
+        run: npm install -g @react-native-community/cli
 
       - name: Install Dependencies
         run: npm install
       
-      - name: Ensure React Native CLI is Installed
-        run: npm install -g @react-native-community/cli
+      - name: Run React Native Autolinking
+        run: |
+          cd android
+          npx @react-native-community/cli config
+          cd ..
       
       - name: Install Java
         uses: actions/setup-java@v4
