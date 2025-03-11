@@ -180,7 +180,7 @@ jobs:
      #   run: ls -la && ls -R ios || echo "android/app directory does not exist"
 
       - name: Fix Permissions for React Native Scripts
-          run: chmod +x node_modules/react-native/scripts/xcode/with-environment.sh
+        run: chmod +x node_modules/react-native/scripts/xcode/with-environment.sh
 
       - name: Install CocoaPods
         run: |
