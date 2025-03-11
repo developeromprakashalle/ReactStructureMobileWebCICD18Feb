@@ -82,11 +82,13 @@ jobs:
           rm -rf node_modules package-lock.json
           npm install 
       
-      #- name: Run React Native Autolinking
-      #  run: |
-      #    cd android
-      #    npx @react-native-community/cli config
-      #    cd ..
+      - name: Run React Native Autolinking
+        run: |
+          cd android
+          npx @react-native-community/cli config
+          cd ..
+          npx react-native link
+          
       - name: Use Node.js 20
         uses: actions/setup-node@v4
         with:
