@@ -138,7 +138,7 @@ jobs:
       - name: Set Android Version
         run: |
             sed -i "s/versionCode [0-9]\+/versionCode ${{ inputs.AndroidVersionCode }}/" android/app/build.gradle
-            sed -i 's/versionName "[0-9.]*/versionName "'${{ inputs.BuildVersion }}'"/' android/app/build.gradle
+            sed -i 's/versionName "[^"]*/versionName "'${{ inputs.BuildVersion }}'"/' android/app/build.gradle
 
       - name: Grant Execute Permission to Gradle Wrapper
         run: chmod +x android/gradlew
