@@ -68,13 +68,13 @@ jobs:
         with:
           node-version: 20
       
-      - name: Ensure React Native CLI is Installed
-        run: |
-              npm install -g @react-native-community/cli --force
-              echo "Adding npm global binaries to PATH"
-              echo "$(npm root -g)/bin" >> $GITHUB_PATH
-              npx --version
-              npx @react-native-community/cli --version || echo "React Native CLI not found"
+      # - name: Ensure React Native CLI is Installed
+      #   run: |
+      #         npm install -g @react-native-community/cli --force
+      #         echo "Adding npm global binaries to PATH"
+      #         echo "$(npm root -g)/bin" >> $GITHUB_PATH
+      #         npx --version
+      #         npx @react-native-community/cli --version || echo "React Native CLI not found"
   
   
       - name: Install Dependencies
