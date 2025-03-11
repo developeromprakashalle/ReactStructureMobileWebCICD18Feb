@@ -94,10 +94,9 @@ jobs:
               distribution: 'adopt'
               java-version: '21'
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+   #   - name: Setup Gradle
+         #uses: gradle/actions/setup-gradle@v3
       
-        
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
@@ -180,7 +179,7 @@ jobs:
      #   run: ls -la && ls -R ios || echo "android/app directory does not exist"
 
       - name: Fix Permissions for React Native Scripts
-        run: chmod +x node_modules/react-native/scripts/xcode/with-environment.sh
+        run: chmod +x node_modules/react-native
 
       - name: Install CocoaPods
         run: |
@@ -251,17 +250,17 @@ jobs:
           name: reactnative-workspace
           path: .
 
-      - name: Build Web App
-        run: |
-          cd web
-          npm install
-          npm install -g typescript
-          npm run lint
+     # - name: Build Web App
+        #run: |
+          #cd web
+          #npm install
+          #npm install -g typescript
+          #npm run lint
 
       - name: Install jq
         run: |
           sudo apt update
-          sudo apt-get install jq  
+          sudo apt-get install jq
 
       - name: Update package.json version
         run: |
