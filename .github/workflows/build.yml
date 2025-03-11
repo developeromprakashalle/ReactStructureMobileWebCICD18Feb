@@ -83,6 +83,13 @@ jobs:
         id: get_repo_name
         run: |
           echo "REPO_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
+      
+      - name: Archive Workspace for Android Job
+        uses: actions/upload-artifact@v4
+        with:
+            name: reactnative-workspace
+            path: .
+            retention-days: 1
 
   android-build:
     needs: setupEnv
@@ -93,8 +100,14 @@ jobs:
         REPO_NAME: ${{ needs.setupEnv.outputs.repository_name }}
 
     steps:
-      - name: Print Repository Name
-        run: echo $REPO_NAME
+      - name: Download Workspace from SetupEnv
+        uses: actions/download-artifact@v4
+        with:
+          name: reactnative-workspace
+          path: .
+      - name: Verify Workspace Integrity
+        run: ls -la && ls -R android/app || echo "android/app directory does not exist"
+      
 
       - name: Set Android Version
         run: |
