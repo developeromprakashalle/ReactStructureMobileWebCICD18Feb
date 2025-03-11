@@ -171,6 +171,14 @@ jobs:
         REPO_NAME: ${{ needs.setupEnv.outputs.repository_name }}
     
     steps:
+      - name: Download Workspace from SetupEnv
+        uses: actions/download-artifact@v4
+        with:
+          name: reactnative-workspace
+          path: .
+     # - name: Verify Workspace Integrity
+     #   run: ls -la && ls -R ios || echo "android/app directory does not exist"
+
       - name: Install CocoaPods
         run: |
           cd ios
@@ -234,6 +242,12 @@ jobs:
     env:
         REPO_NAME: ${{ needs.setupEnv.outputs.repository_name }}
     steps:
+      - name: Download Workspace from SetupEnv
+        uses: actions/download-artifact@v4
+        with:
+          name: reactnative-workspace
+          path: .
+          
       - name: Build Web App
         run: |
           cd web
