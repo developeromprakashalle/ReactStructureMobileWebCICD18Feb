@@ -98,13 +98,8 @@ jobs:
 
       - name: Set Android Version
         run: |
-          if [ -f "android/app/build.gradle" ]; then
             sed -i "s/versionCode [0-9]\+/versionCode ${{ inputs.AndroidVersionCode }}/" android/app/build.gradle
-            sed -i "s/versionName "[0-9\.]*/versionName ${{ inputs.BuildVersion }}/" android/app/build.gradle
-          else
-            echo "Error: android/app/build.gradle not found!"
-            exit 1
-          fi
+            sed -i 's/versionName "[0-9.]*/versionName "'${{ inputs.BuildVersion }}'"/' android/app/build.gradle
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
@@ -129,9 +124,11 @@ jobs:
 
   build-ios:
     needs: setupEnv
-    if: ${{ inputs.platform == 'IOS' }}
+    if: ${{ github.event.inputs.platform == 'IOS' }}
     name: Build iOS App
     runs-on: macos-latest
+    env:
+        REPO_NAME: ${{ needs.setupEnv.outputs.repository_name }}
     
     steps:
       - name: Install CocoaPods
@@ -191,9 +188,11 @@ jobs:
 
   build-web:
     needs: setupEnv
-    if: ${{ inputs.platform == 'WEB' }}
+    if: ${{ github.event.inputs.platform == 'WEB' }}
     name: Build WEB APP
     runs-on: ubuntu-latest
+    env:
+        REPO_NAME: ${{ needs.setupEnv.outputs.repository_name }}
     steps:
       - name: Build Web App
         run: |
@@ -203,7 +202,9 @@ jobs:
           npm run lint
 
       - name: Install jq
-        run: sudo apt-get install jq  
+        run: |
+          sudo apt update
+          sudo apt-get install jq  
 
       - name: Update package.json version
         run: |
