@@ -71,8 +71,8 @@ jobs:
       - name: Install Dependencies
         run: npm install
       
-      - name: Ensure npx is Available
-        run: npm install -g npx
+      - name: Ensure React Native CLI is Installed
+        run: npm install -g @react-native-community/cli
       
       - name: Install Java
         uses: actions/setup-java@v4
