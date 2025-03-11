@@ -132,8 +132,8 @@ jobs:
         with:
           name: reactnative-workspace
           path: .
-      - name: Verify Workspace Integrity
-        run: ls -la && ls -R android/app || echo "android/app directory does not exist"
+      #- name: Verify Workspace Integrity
+        #run: ls -la && ls -R android/app || echo "android/app directory does not exist"
 
       - name: Set Android Version
         run: |
@@ -145,9 +145,11 @@ jobs:
 
       - name: Build Android APK
         run: |
-          npm install
+          npm install -g @react-native-community/cli
+          #npm install
           cd android
-          ./gradlew assemble${{ inputs.buildType }} bundle${{ inputs.buildType }}
+          ./gradlew assemble${{ inputs.buildType }} bundle${{ inputs.buildType }} --stacktrace --info
+
 
       - name: Rename APK
         run: |
