@@ -270,8 +270,8 @@ jobs:
           jq --arg ver "$NEW_VERSION" '.version = $ver' package.json > temp.json && mv temp.json package.json
           echo "Updated package.json version to $NEW_VERSION"
         
-      - name: Clean Web Build Directory
-        run: rm -rf web/dist
+      #- name: Clean Web Build Directory
+       #run: rm -rf web/dist
 
       - name: Build Web App
         run: |
