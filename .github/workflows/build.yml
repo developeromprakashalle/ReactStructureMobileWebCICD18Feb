@@ -55,7 +55,7 @@ jobs:
     name: Setup Environment
     runs-on: ubuntu-latest
     outputs:
-      node_version: 22
+      repository_name: ${{ steps.get_repo_name.outputs.REPO_NAME }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -77,26 +77,23 @@ jobs:
           echo "NPM: $(npm -v)"
           echo "Java: $(java -version)"
           echo "Gradle: $(gradle -v)"
+          echo "Android SDK: $(sdkmanager --version)" 
+
+      - name: Get Repository Name
+        id: get_repo_name
+        run: echo "REPO_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
 
   android-build:
     needs: setupEnv
-    if: ${{ inputs.platform == 'ANDROID' }}
+    if: ${{ github.event.inputs.platform == 'ANDROID' }}
     name: Build Android APK
     runs-on: ubuntu-latest
+    env:
+      REPO_NAME: ${{ needs.setupEnv.outputs.repository_name }}  # <-- Access output here
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-         submodules: true
-         fetch-depth: 0
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
- 
-      - name: Install Dependencies
-        run: npm install
+      - name: Print Repository Name
+        run: echo $REPO_NAME
 
       - name: Set Android Version
         run: |
