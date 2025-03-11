@@ -51,7 +51,7 @@ on:
           - PROD
 
 jobs:
-  setup:
+  setupEnv:
     name: Setup Environment
     runs-on: ubuntu-latest
     outputs:
@@ -79,7 +79,7 @@ jobs:
           echo "Gradle: $(gradle -v)"
 
   android-build:
-    needs: setup
+    needs: setupEnv
     if: ${{ inputs.platform == 'ANDROID' }}
     name: Build Android APK
     runs-on: ubuntu-latest
@@ -117,7 +117,7 @@ jobs:
           path: android/app/build/outputs/apk/${{ inputs.buildType }}/app.apk
 
   build-ios:
-    needs: setup
+    needs: setupEnv
     if: ${{ inputs.platform == 'IOS' }}
     name: Build iOS App
     runs-on: macos-latest
@@ -179,7 +179,7 @@ jobs:
           path: ios/build/export/adbReactMIB.ipa
 
   build-web:
-    needs: setup
+    needs: setupEnv
     if: ${{ inputs.platform == 'WEB' }}
     name: Build WEB APP
     runs-on: ubuntu-latest
