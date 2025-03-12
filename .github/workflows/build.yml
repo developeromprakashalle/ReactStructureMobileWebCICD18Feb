@@ -123,21 +123,23 @@ jobs:
       - name: Grant Execute Permission to Gradle Wrapper
         run: chmod +x android/gradlew
 
-      - name: Build Android APK
+      - name: Build Android APK & AAB
         run: |
-          npm install
           cd android
           ./gradlew assemble${{ inputs.buildType }} bundle${{ inputs.buildType }} --stacktrace --info
-
-      - name: Rename APK
-        run: |
-          mv android/app/build/outputs/apk/${{ inputs.buildType }}/app-${{ inputs.buildType }}.apk android/app/build/outputs/apk/${{ inputs.buildType }}/app.apk
-
-      - name: Publish Android Artifact
+    
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ReactNativeCICD-${{ inputs.buildType }}
-          path: android/app/build/outputs/apk/${{ inputs.buildType }}/app.apk
+          name: ReactNative-APK-${{ inputs.buildType }}
+          path: android/app/build/outputs/apk/${{ inputs.buildType }}/app-${{ inputs.buildType }}.apk
+    
+      - name: Upload AAB Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ReactNative-AAB-${{ inputs.buildType }}
+          path: android/app/build/outputs/bundle/${{ inputs.buildType }}/app-${{ inputs.buildType }}.aab
+      
 
   build-ios:
     needs: setupEnv
