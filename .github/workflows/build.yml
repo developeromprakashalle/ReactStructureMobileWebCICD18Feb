@@ -84,7 +84,7 @@ jobs:
         run: |
           echo "REPO_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
       
-      - name: Archive Workspace for Android Job
+      - name: Archive Workspace
         uses: actions/upload-artifact@v4
         with:
             name: reactnative-workspace
@@ -94,7 +94,7 @@ jobs:
   android-build:
     needs: setupEnv
     if: ${{ github.event.inputs.platform == 'ANDROID' }}
-    name: Build Android APK
+    name: Build Android APK & AAB
     runs-on: ubuntu-latest
     env:
         REPO_NAME: ${{ needs.setupEnv.outputs.repository_name }}
@@ -105,16 +105,16 @@ jobs:
         with:
           name: reactnative-workspace
           path: .
-      
-      - name: Install Java
+
+      - name: Install Java & Android SDK
         uses: actions/setup-java@v4
         with:
               distribution: 'adopt'
               java-version: '17'
-      
+
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
-      
+
       - name: Set Android Version
         run: |
             sed -i "s/versionCode [0-9]\+/versionCode ${{ inputs.AndroidVersionCode }}/" android/app/build.gradle
@@ -128,19 +128,14 @@ jobs:
           npm install
           cd android
           ./gradlew assemble${{ inputs.buildType }} bundle${{ inputs.buildType }} --stacktrace --info
-    
-      - name: Upload APK Artifact
+
+      - name: Upload APK & AAB Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ReactNative-APK-${{ inputs.buildType }}
-          path: android/app/build/outputs/apk/${{ inputs.buildType }}/app-${{ inputs.buildType }}.apk
-    
-      - name: Upload AAB Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ReactNative-AAB-${{ inputs.buildType }}
-          path: android/app/build/outputs/bundle/${{ inputs.buildType }}/app-${{ inputs.buildType }}.aab
-      
+          name: ReactNative-Android-Build-${{ inputs.buildType }}
+          path: |
+            android/app/build/outputs/apk/${{ inputs.buildType }}/app-${{ inputs.buildType }}.apk
+            android/app/build/outputs/bundle/${{ inputs.buildType }}/app-${{ inputs.buildType }}.aab
 
   build-ios:
     needs: setupEnv
@@ -149,7 +144,7 @@ jobs:
     runs-on: macos-latest
     env:
         REPO_NAME: ${{ needs.setupEnv.outputs.repository_name }}
-    
+
     steps:
       - name: Download Workspace from SetupEnv
         uses: actions/download-artifact@v4
@@ -157,7 +152,7 @@ jobs:
           name: reactnative-workspace
           path: .
 
-      - name: Install CocoaPods
+      - name: Install CocoaPods & Dependencies
         run: |
           npm install
           chmod +x node_modules/react-native/scripts/xcode/*.sh
@@ -189,7 +184,7 @@ jobs:
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
         
-      - name: Archive App
+      - name: Archive iOS App
         run: |
           cd ios
           xcodebuild clean archive \
@@ -198,7 +193,7 @@ jobs:
             -sdk iphoneos \
             -archivePath ${{ github.workspace }}/build/adbReactMIB.xcarchive \
             archive -verbose
-  
+
       - name: Export IPA
         run: |
           cd ios
@@ -217,10 +212,11 @@ jobs:
   build-web:
     needs: setupEnv
     if: ${{ github.event.inputs.platform == 'WEB' }}
-    name: Build WEB APP
+    name: Build Web App
     runs-on: ubuntu-latest
     env:
         REPO_NAME: ${{ needs.setupEnv.outputs.repository_name }}
+
     steps:
       - name: Download Workspace from SetupEnv
         uses: actions/download-artifact@v4
@@ -228,28 +224,17 @@ jobs:
           name: reactnative-workspace
           path: .
 
-      - name: Build Web App
+      - name: Install Dependencies
         run: |
           cd web
           npm install
-          #npm install -g typescript
-          #npm run lint
 
-      - name: Install jq
-        run: |
-          cd web
-          sudo apt update
-          sudo apt-get install jq
-
-      - name: Update package.json version
+      - name: Update Web App Version
         run: |
           cd web
           NEW_VERSION=${{ inputs.WebAppVersion }}
           jq --arg ver "$NEW_VERSION" '.version = $ver' package.json > temp.json && mv temp.json package.json
           echo "Updated package.json version to $NEW_VERSION"
-        
-      #- name: Clean Web Build Directory
-       #run: rm -rf web/dist
 
       - name: Build Web App
         run: |
