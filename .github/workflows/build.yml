@@ -125,6 +125,7 @@ jobs:
 
       - name: Build Android APK & AAB
         run: |
+          npm install
           cd android
           ./gradlew assemble${{ inputs.buildType }} bundle${{ inputs.buildType }} --stacktrace --info
     
