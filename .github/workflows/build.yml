@@ -67,36 +67,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-      
-      # - name: Ensure React Native CLI is Installed
-      #   run: |
-      #         npm install -g @react-native-community/cli --force
-      #         echo "Adding npm global binaries to PATH"
-      #         echo "$(npm root -g)/bin" >> $GITHUB_PATH
-      #         npx --version
-      #         npx @react-native-community/cli --version || echo "React Native CLI not found"
-  
   
       - name: Install Dependencies
         run: npm install
-  
-      # - name: Run React Native Autolinking
-      #   run: |
-      #         cd android
-      #         npx --yes @react-native-community/cli config || echo "Autolinking failed"
-      #         cd ..
-
-      - name: Install Java
-        uses: actions/setup-java@v4
-        with:
-              distribution: 'adopt'
-              java-version: '17'
-
-   #   - name: Setup Gradle
-         #uses: gradle/actions/setup-gradle@v3
-      
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
 
       - name: Print Versions
         run: |
@@ -132,25 +105,29 @@ jobs:
         with:
           name: reactnative-workspace
           path: .
-      #- name: Verify Workspace Integrity
-        #run: ls -la && ls -R android/app || echo "android/app directory does not exist"
-
+      
+      - name: Install Java
+        uses: actions/setup-java@v4
+        with:
+              distribution: 'adopt'
+              java-version: '17'
+      
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+      
       - name: Set Android Version
         run: |
             sed -i "s/versionCode [0-9]\+/versionCode ${{ inputs.AndroidVersionCode }}/" android/app/build.gradle
             sed -i "s/versionName \"[^\"]*/versionName \"${{ inputs.BuildVersion }}/" android/app/build.gradle
-          #sed -i "s/versionName "[^"]*/versionName "'${{ inputs.BuildVersion }}'"/' android/app/build.gradle
 
       - name: Grant Execute Permission to Gradle Wrapper
         run: chmod +x android/gradlew
 
       - name: Build Android APK
         run: |
-          npm install -g @react-native-community/cli
-          #npm install
+          npm install
           cd android
           ./gradlew assemble${{ inputs.buildType }} bundle${{ inputs.buildType }} --stacktrace --info
-
 
       - name: Rename APK
         run: |
@@ -176,16 +153,11 @@ jobs:
         with:
           name: reactnative-workspace
           path: .
-     # - name: Verify Workspace Integrity
-     #   run: ls -la && ls -R ios || echo "android/app directory does not exist"
-
-      #- name: Fix Permissions for React Native Scripts
-        #run: chmod +x node_modules/react-native
 
       - name: Install CocoaPods
         run: |
-          npm install -g @react-native-community/cli
-          chmod +x node_modules/react-native/scripts/*.sh
+          npm install
+          chmod +x node_modules/react-native/scripts/xcode/*.sh
           cd ios
           pod install --repo-update
 
