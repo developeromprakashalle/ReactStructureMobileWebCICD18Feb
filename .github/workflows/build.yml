@@ -179,11 +179,13 @@ jobs:
      # - name: Verify Workspace Integrity
      #   run: ls -la && ls -R ios || echo "android/app directory does not exist"
 
-      - name: Fix Permissions for React Native Scripts
-        run: chmod +x node_modules/react-native
+      #- name: Fix Permissions for React Native Scripts
+        #run: chmod +x node_modules/react-native
 
       - name: Install CocoaPods
         run: |
+          npm install -g @react-native-community/cli
+          chmod +x node_modules/react-native/scripts/*.sh
           cd ios
           pod install --repo-update
 
