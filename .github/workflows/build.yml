@@ -247,3 +247,13 @@ jobs:
           name: ReactNativeWebBuild
           path: web/dist
           retention-days: 10
+      
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+  
+      - name: Deploy to Firebase Hosting
+        env:
+            FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        run: |
+            cd web
+            firebase deploy --only hosting --token "$FIREBASE_TOKEN"
