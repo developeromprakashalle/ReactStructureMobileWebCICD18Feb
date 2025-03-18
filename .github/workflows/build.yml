@@ -269,3 +269,4 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_REACTAPPCD }}
           projectId: reactappcd
           folder: web/dist
+          entryPoint: firebase.json
