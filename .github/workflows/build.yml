@@ -128,6 +128,11 @@ jobs:
           npm install
           cd android
           ./gradlew assemble${{ inputs.buildType }} bundle${{ inputs.buildType }} --stacktrace --info
+      - name: Publish to firebase app distribution
+        run: |
+          npm install -g firebase-tools
+          firebase appdistribution:distribute android/app/build/outputs/apk/${{ inputs.buildType }}/app-${{ inputs.buildType }}.apk --app ${{ secrets.FIREBASE_APP_ID }} --token ${{ secrets.FIREBASE_TOKEN }}  
+            
 
       - name: Upload APK & AAB Artifacts
         uses: actions/upload-artifact@v4
