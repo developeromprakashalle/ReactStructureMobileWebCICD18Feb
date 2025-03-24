@@ -128,8 +128,9 @@ jobs:
           npm install
           cd android
           ./gradlew assemble${{ inputs.buildType }} bundle${{ inputs.buildType }} --stacktrace --info
-          - name: Set up Firebase Credentials
-          run: echo '${{ secrets.CREDENTIAL_FILE_CONTENT }}' > $HOME/firebase-key.json
+      
+      - name: Set up Firebase Credentials
+        run: echo '${{ secrets.CREDENTIAL_FILE_CONTENT }}' > $HOME/firebase-key.json 
         
       - name: Publish to Firebase App Distribution
         env:
