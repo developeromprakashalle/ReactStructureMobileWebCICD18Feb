@@ -1,8 +1,0 @@
-{
-  "projects": {
-    "default": "reactappcd",
-    "staging": "reactappcd"
-  },
-  "targets": {},
-  "etags": {}
-}
