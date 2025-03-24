@@ -134,7 +134,7 @@ jobs:
       - name: Publish to Firebase App Distribution
         env:
             CREDENTIAL_FILE_CONTENT: $HOME/firebase-key.json
-          run: |
+        run: |
             npx firebase-tools appdistribution:distribute \
               android/app/build/outputs/apk/${{ inputs.buildType }}/app-${{ inputs.buildType }}.apk \
               --app ${{ secrets.FIREBASE_APP_ID }}
