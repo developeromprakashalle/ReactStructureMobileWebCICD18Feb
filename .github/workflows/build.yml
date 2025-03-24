@@ -263,28 +263,3 @@ jobs:
           name: ReactNativeWebBuild
           path: web/dist
           retention-days: 10
-     
-
-      
-  # deploy-web:
-  #   needs: build-web
-  ##   if: ${{ github.event.inputs.platform == 'WEB' }}
-  #   name: Deploy Web App
-  #   runs-on: ubuntu-latest
-  #   env:
-  #       REPO_NAME: ${{ needs.setupEnv.outputs.repository_name }}
-  #
-  #   steps:
-  #     - name: Download Web Build from Build Web
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         name:   ReactNativeWebBuild
-  #
-  #     - name: Deploy Web App to Firebase Hosting
-  #       uses: FirebaseExtended/action-hosting-deploy@v0
-  #       with:
-  #         repoToken: ${{ secrets.GITHUB_TOKEN }}
-  #         firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_REACTAPPCD }}
-  #         projectId: reactappcd
-  #         folder: web/dist
-  #         entryPoint: firebase.json
