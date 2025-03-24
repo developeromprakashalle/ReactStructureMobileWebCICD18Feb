@@ -1,5 +1,5 @@
 # Use Node.js as the base image
-FROM node:18
+FROM node:18-alpine
 
 # Set working directory
 WORKDIR /app
@@ -35,4 +35,4 @@ RUN npx tsc -b && npm run build
 EXPOSE 4175
 
 # Start the preview server
-CMD ["npx", "vite", "preview", "--host", "0.0.0.0", "--port", "4175"]
+CMD ["npx", "vite", "preview"]
