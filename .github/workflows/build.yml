@@ -109,16 +109,26 @@ jobs:
       - name: Install Java & Android SDK
         uses: actions/setup-java@v4
         with:
-              distribution: 'adopt'
-              java-version: '17'
+          distribution: 'adopt'
+          java-version: '17'
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Cache Gradle Dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+
       - name: Set Android Version
         run: |
-            sed -i "s/versionCode [0-9]\+/versionCode ${{ inputs.AndroidVersionCode }}/" android/app/build.gradle
-            sed -i "s/versionName \"[^\"]*/versionName \"${{ inputs.BuildVersion }}/" android/app/build.gradle
+          sed -i "s/versionCode=[0-9]\+/versionCode=${{ inputs.AndroidVersionCode }}/" android/gradle.properties
+          sed -i "s/versionName=.*/versionName=${{ inputs.BuildVersion }}/" android/gradle.properties
 
       - name: Grant Execute Permission to Gradle Wrapper
         run: chmod +x android/gradlew
@@ -127,19 +137,24 @@ jobs:
         run: |
           npm install
           cd android
-          ./gradlew assemble${{ inputs.buildType }} bundle${{ inputs.buildType }} --stacktrace --info
-      
+          ./gradlew assemble${{ inputs.buildType }} bundle${{ inputs.buildType }} --stacktrace --info --parallel --daemon
+
       - name: Set up Firebase Credentials
-        run: echo '${{ secrets.CREDENTIAL_FILE_CONTENT }}' > $HOME/firebase-key.json 
-        
+        run: |
+          echo '${{ secrets.CREDENTIAL_FILE_CONTENT }}' > $HOME/firebase-key.json
+          export GOOGLE_APPLICATION_CREDENTIALS="$HOME/firebase-key.json"
+
       - name: Publish to Firebase App Distribution
         env:
-            CREDENTIAL_FILE_CONTENT: $HOME/firebase-key.json
+          GOOGLE_APPLICATION_CREDENTIALS: $HOME/firebase-key.json
         run: |
-            npx firebase-tools appdistribution:distribute \
-              android/app/build/outputs/apk/${{ inputs.buildType }}/app-${{ inputs.buildType }}.apk \
-              --app ${{ secrets.FIREBASE_APP_ID }}
-
+          RESPONSE=$(npx firebase-tools appdistribution:distribute \
+            android/app/build/outputs/apk/${{ inputs.buildType }}/app-${{ inputs.buildType }}.apk \
+            --app ${{ secrets.FIREBASE_APP_ID }} \
+            --release-notes "New version available!" \
+            --groups testers)
+          echo "✅ App successfully uploaded! Download link:"
+          echo "$RESPONSE"
 
       - name: Upload APK & AAB Artifacts
         uses: actions/upload-artifact@v4
@@ -148,6 +163,7 @@ jobs:
           path: |
             android/app/build/outputs/apk/${{ inputs.buildType }}/app-${{ inputs.buildType }}.apk
             android/app/build/outputs/bundle/${{ inputs.buildType }}/app-${{ inputs.buildType }}.aab
+
 
   build-ios:
     needs: setupEnv
