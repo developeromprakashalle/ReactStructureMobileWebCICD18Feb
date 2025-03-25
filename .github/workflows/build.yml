@@ -136,6 +136,7 @@ jobs:
       - name: Build Android APK & AAB
         run: |
           npm install
+          npm install -g firebase-tools
           cd android
           ./gradlew assemble${{ inputs.buildType }} bundle${{ inputs.buildType }} --stacktrace --info --parallel --daemon
 
