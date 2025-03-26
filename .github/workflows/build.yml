@@ -149,6 +149,7 @@ jobs:
         run: |
           echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}' > $HOME/firebase-keys.json
           export GOOGLE_APPLICATION_CREDENTIALS="$HOME/firebase-keys.json"
+          firebase login:ci --token "${{ secrets.FIREBASE_TOKEN }}"
 
       - name: Verify Firebase Authentication
         run: |
