@@ -140,24 +140,23 @@ jobs:
           cd android
           ./gradlew assemble${{ inputs.buildType }} bundle${{ inputs.buildType }} --stacktrace --info --parallel --daemon
 
-      - name: Set up Firebase Credentials
+          - name: Set up Firebase Credentials
+          run: |
+            echo '${{ secrets.CREDENTIAL_FILE_CONTENT }}' > $HOME/firebase-key.json
+            export GOOGLE_APPLICATION_CREDENTIALS="$HOME/firebase-key.json"
+  
+      - name: Firebase Authentication
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
         run: |
-          echo '${{ secrets.CREDENTIAL_FILE_CONTENT }}' > $HOME/firebase-key.json
-          export GOOGLE_APPLICATION_CREDENTIALS="$HOME/firebase-key.json"
-
-      - name: Firebase Login
-        run: |
-          firebase login:ci --token ${{ secrets.FIREBASE_TOKEN }}
-      
-      - name: Check Firebase Authentication
-        run: |
+          echo "Using Firebase Token for authentication"
           npx firebase-tools --version
           npx firebase-tools projects:list
-
 
       - name: Publish to Firebase App Distribution
         env:
           GOOGLE_APPLICATION_CREDENTIALS: $HOME/firebase-key.json
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
         run: |
           RESPONSE=$(npx firebase-tools appdistribution:distribute \
             android/app/build/outputs/apk/${{ inputs.buildType }}/app-${{ inputs.buildType }}.apk \
