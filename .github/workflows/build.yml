@@ -138,12 +138,12 @@ jobs:
           npm install
           npm install -g firebase-tools
           cd android
-          ./gradlew assemble${{ inputs.buildType }} --stacktrace --info --parallel --daemon
-
-          - name: Set up Firebase Credentials
-          run: |
-            echo '${{ secrets.CREDENTIAL_FILE_CONTENT }}' > $HOME/firebase-key.json
-            export GOOGLE_APPLICATION_CREDENTIALS="$HOME/firebase-key.json"
+          ./gradlew assemble${{ inputs.buildType }}
+      
+      - name: Set up Firebase Credentials
+        run: |
+          echo '${{ secrets.CREDENTIAL_FILE_CONTENT }}' > $HOME/firebase-key.json
+          export GOOGLE_APPLICATION_CREDENTIALS="$HOME/firebase-key.json"
   
       - name: Firebase Authentication
         env:
