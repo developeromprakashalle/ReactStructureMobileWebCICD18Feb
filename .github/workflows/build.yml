@@ -145,21 +145,10 @@ jobs:
           echo '${{ secrets.CREDENTIAL_FILE_CONTENT }}' > $HOME/firebase-key.json
           export GOOGLE_APPLICATION_CREDENTIALS="$HOME/firebase-key.json"
   
-      - name: Firebase Authentication
-        env:
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-        run: |
-          echo "Using Firebase Token for authentication"
-          npx firebase-tools --version
-          npx firebase-tools projects:list
-
-      - name: Publish to Firebase App Distribution
-        env:
-          GOOGLE_APPLICATION_CREDENTIALS: $HOME/firebase-key.json
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+      - name: Upload APK to Firebase App Distribution
         run: |
           RESPONSE=$(npx firebase-tools appdistribution:distribute \
-            android/app/build/outputs/apk/${{ inputs.buildType }}/app-${{ inputs.buildType }}.apk \
+            android/app/build/outputs/apk/release/app-release.apk \
             --app ${{ secrets.FIREBASE_APP_ID }} \
             --release-notes "New version available!" \
             --groups testers 2>&1)
