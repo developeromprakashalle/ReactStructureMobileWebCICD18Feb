@@ -148,7 +148,7 @@ jobs:
       - name: Check Firebase Authentication
         run: |
           npx firebase-tools --version
-          npx firebase-tools login:list
+          npx firebase-tools projects:list
 
 
       - name: Publish to Firebase App Distribution
@@ -159,7 +159,7 @@ jobs:
             android/app/build/outputs/apk/${{ inputs.buildType }}/app-${{ inputs.buildType }}.apk \
             --app ${{ secrets.FIREBASE_APP_ID }} \
             --release-notes "New version available!" \
-            --groups testers)
+            --groups testers 2>&1)
           echo "✅ App successfully uploaded! Download link:"
           echo "$RESPONSE"
 
