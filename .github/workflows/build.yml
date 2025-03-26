@@ -144,6 +144,10 @@ jobs:
         run: |
           echo '${{ secrets.CREDENTIAL_FILE_CONTENT }}' > $HOME/firebase-key.json
           export GOOGLE_APPLICATION_CREDENTIALS="$HOME/firebase-key.json"
+
+      - name: Firebase Login
+        run: |
+          firebase login:ci --token ${{ secrets.FIREBASE_TOKEN }}
       
       - name: Check Firebase Authentication
         run: |
