@@ -143,13 +143,15 @@ jobs:
       - name: Build Android APK & AAB
         run: |
           cd android
-          ./gradlew assemble${{ inputs.buildType }}
+          ./gradlew clean
+          ./gradlew assemble${{ inputs.buildType }} --stacktrace
 
       - name: Install Google Cloud SDK
         run: |
           curl https://sdk.cloud.google.com | bash
           exec -l $SHELL
           gcloud --version
+          gcloud components install firebase
 
       - name: Authenticate with Google Cloud
         run: |
@@ -157,9 +159,9 @@ jobs:
           gcloud auth activate-service-account --key-file=$HOME/firebase-key.json
           gcloud config set project ${{ secrets.FIREBASE_APP_ID }}
 
-      - name: Verify Firebase Authentication
+      - name: Verify Firebase Apps
         run: |
-          gcloud firebase apps list
+          npx firebase-tools apps:list --project ${{ secrets.FIREBASE_APP_ID }}
     
       - name: Upload APK to Firebase App Distribution
         run: |
