@@ -147,8 +147,8 @@ jobs:
 
       - name: Set up Firebase Authentication
         run: |
-          echo '${{secrets.FIREBASE_DISTRIBUTOR_CREDENTIALS}}' > $HOME/firebase-key.json
-          export GOOGLE_APPLICATION_CREDENTIALS="$HOME/firebase-key.json"
+          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}' > $HOME/firebase-keys.json
+          export GOOGLE_APPLICATION_CREDENTIALS="$HOME/firebase-keys.json"
 
       - name: Verify Firebase Authentication
         run: |
