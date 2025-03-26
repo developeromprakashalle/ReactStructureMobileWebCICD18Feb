@@ -67,7 +67,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-  
+
       - name: Install Dependencies
         run: npm install
 
@@ -77,19 +77,19 @@ jobs:
           echo "NPM: $(npm -v)"
           echo "Java: $(java -version)"
           echo "Gradle: $(gradle -v)"
-          echo "Android SDK: $(sdkmanager --version)" 
+          echo "Android SDK: $(sdkmanager --version)"
 
       - name: Get Repository Name
         id: get_repo_name
         run: |
           echo "REPO_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
-      
+
       - name: Archive Workspace
         uses: actions/upload-artifact@v4
         with:
-            name: reactnative-workspace
-            path: .
-            retention-days: 1
+          name: reactnative-workspace
+          path: .
+          retention-days: 1
 
   android-build:
     needs: setupEnv
@@ -97,7 +97,7 @@ jobs:
     name: Build Android APK & AAB
     runs-on: ubuntu-latest
     env:
-        REPO_NAME: ${{ needs.setupEnv.outputs.repository_name }}
+      REPO_NAME: ${{ needs.setupEnv.outputs.repository_name }}
 
     steps:
       - name: Download Workspace from SetupEnv
@@ -145,29 +145,49 @@ jobs:
           cd android
           ./gradlew assemble${{ inputs.buildType }}
 
-      - name: Set up Firebase Authentication
+      - name: Install Google Cloud SDK
         run: |
-          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}' > $HOME/firebase-keys.json
-          export GOOGLE_APPLICATION_CREDENTIALS="$HOME/firebase-keys.json"
-          firebase login:ci --token "${{ secrets.FIREBASE_TOKEN }}"
+          curl https://sdk.cloud.google.com | bash
+          exec -l $SHELL
+          gcloud --version
+
+      - name: Authenticate with Google Cloud
+        run: |
+          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}' > $HOME/firebase-key.json
+          gcloud auth activate-service-account --key-file=$HOME/firebase-key.json
+          gcloud config set project ${{ secrets.FIREBASE_APP_ID }}
 
       - name: Verify Firebase Authentication
         run: |
-          npx firebase-tools projects:list
-
+          gcloud firebase apps list
+    
       - name: Upload APK to Firebase App Distribution
         run: |
-          APK_PATH="android/app/build/outputs/apk/${{ inputs.buildType }}/app-${{ inputs.buildType }}.apk"
-          echo "Uploading APK from: $APK_PATH"
-
-          RESPONSE=$(npx firebase-tools appdistribution:distribute \
-            $APK_PATH \
+            gcloud firebase appdistribution releases distribute \
+            android/app/build/outputs/apk/release/app-release.apk \
             --app ${{ secrets.FIREBASE_APP_ID }} \
             --release-notes "New version available!" \
-            --groups testers 2>&1)
+            --groups testers
+        
 
-          echo "✅ App successfully uploaded! Download link:"
-          echo "$RESPONSE"
+      # - name: Verify Firebase Authentication
+      #   run: |
+      #     npx firebase-tools projects:list
+
+      # - name: Upload APK to Firebase App Distribution
+      #   run: |
+      #     export GOOGLE_APPLICATION_CREDENTIALS="$HOME/firebase-keys.json"
+      #     APK_PATH="android/app/build/outputs/apk/${{ inputs.buildType }}/app-${{ inputs.buildType }}.apk"
+      #     echo "Uploading APK from: $APK_PATH"
+
+      #     RESPONSE=$(firebase appdistribution:distribute \
+      #       $APK_PATH \
+      #       --app ${{ secrets.FIREBASE_APP_ID }} \
+      #       --release-notes "New version available!" \
+      #       --groups development)
+
+      #     echo "✅ App successfully uploaded! Download link:"
+      #     echo "$RESPONSE"
 
       - name: Upload APK & AAB Artifacts
         uses: actions/upload-artifact@v4
@@ -177,14 +197,13 @@ jobs:
             android/app/build/outputs/apk/${{ inputs.buildType }}/app-${{ inputs.buildType }}.apk
           #android/app/build/outputs/bundle/${{ inputs.buildType }}/app-${{ inputs.buildType }}.aab
 
-
   build-ios:
     needs: setupEnv
     if: ${{ github.event.inputs.platform == 'IOS' }}
     name: Build iOS App
     runs-on: macos-latest
     env:
-        REPO_NAME: ${{ needs.setupEnv.outputs.repository_name }}
+      REPO_NAME: ${{ needs.setupEnv.outputs.repository_name }}
 
     steps:
       - name: Download Workspace from SetupEnv
@@ -224,7 +243,7 @@ jobs:
 
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
-        
+
       - name: Archive iOS App
         run: |
           cd ios
@@ -256,7 +275,7 @@ jobs:
     name: Build Web App
     runs-on: ubuntu-latest
     env:
-        REPO_NAME: ${{ needs.setupEnv.outputs.repository_name }}
+      REPO_NAME: ${{ needs.setupEnv.outputs.repository_name }}
 
     steps:
       - name: Download Workspace from SetupEnv
@@ -282,21 +301,21 @@ jobs:
           cd web
           npm install --legacy-peer-deps
           npm run build
-  
+
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-            username: ${{ secrets.DOCKER_USERNAME }}
-            password: ${{ secrets.DOCKER_PASSWORD }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
       # Build Docker Image
       - name: Build Docker Image
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/reactnative-web:${{ inputs.WebAppVersion }} .
-  
+
       - name: Push Docker Image
         run: |
-            docker push ${{ secrets.DOCKER_USERNAME }}/reactnative-web:${{ inputs.WebAppVersion }}
+          docker push ${{ secrets.DOCKER_USERNAME }}/reactnative-web:${{ inputs.WebAppVersion }}
 
       - name: Upload Web Build
         uses: actions/upload-artifact@v4
