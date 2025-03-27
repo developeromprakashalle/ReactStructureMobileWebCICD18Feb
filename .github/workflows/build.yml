@@ -158,7 +158,7 @@ jobs:
         run: |
             echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}' > $HOME/firebase-key.json
             gcloud auth activate-service-account --key-file=$HOME/firebase-key.json
-            gcloud config set project ${{ secrets.Firebase_Project_Id }}
+            gcloud config set project ${{ secrets.FIREBASE_PROJECT_ID }}
         
             # Set the Google credentials environment variable for Firebase CLI
             export GOOGLE_APPLICATION_CREDENTIALS="$HOME/firebase-key.json"
