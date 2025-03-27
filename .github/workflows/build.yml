@@ -156,13 +156,16 @@ jobs:
 
       - name: Authenticate with Google Cloud
         run: |
-          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}' > $HOME/firebase-key.json
-          gcloud auth activate-service-account --key-file=$HOME/firebase-key.json
-          gcloud config set project ${{ secrets.FIREBASE_APP_ID }}
-
-     # - name: Verify Firebase Apps
-     #   run: |
-     #     npx firebase-tools apps:list --project ${{ secrets.FIREBASE_APP_ID }}
+            echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}' > $HOME/firebase-key.json
+            gcloud auth activate-service-account --key-file=$HOME/firebase-key.json
+            gcloud config set project ${{ secrets.FIREBASE_APP_ID }}
+        
+            # Set the Google credentials environment variable for Firebase CLI
+            export GOOGLE_APPLICATION_CREDENTIALS="$HOME/firebase-key.json"
+        
+            # Verify authentication
+            gcloud auth list
+            firebase projects:list
     
       - name: Upload APK to Firebase App Distribution
         run: |
