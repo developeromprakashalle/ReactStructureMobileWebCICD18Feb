@@ -172,29 +172,9 @@ jobs:
             export GOOGLE_APPLICATION_CREDENTIALS="$HOME/firebase-key.json"
           
             npx firebase appdistribution:distribute android/app/build/outputs/apk/release/app-release.apk \
-                --app 1:986771866945:android:d2ff46120a0369b2b68dc0 \
+                --app ${{ secrets.FIREBASE_APP_ID }} \
                 --release-notes "New update available" \
                 --groups development
-          
-        
-      # - name: Verify Firebase Authentication
-      #   run: |
-      #     npx firebase-tools projects:list
-
-      # - name: Upload APK to Firebase App Distribution
-      #   run: |
-      #     export GOOGLE_APPLICATION_CREDENTIALS="$HOME/firebase-keys.json"
-      #     APK_PATH="android/app/build/outputs/apk/${{ inputs.buildType }}/app-${{ inputs.buildType }}.apk"
-      #     echo "Uploading APK from: $APK_PATH"
-
-      #     RESPONSE=$(firebase appdistribution:distribute \
-      #       $APK_PATH \
-      #       --app ${{ secrets.FIREBASE_APP_ID }} \
-      #       --release-notes "New version available!" \
-      #       --groups development)
-
-      #     echo "✅ App successfully uploaded! Download link:"
-      #     echo "$RESPONSE"
 
       - name: Upload APK & AAB Artifacts
         uses: actions/upload-artifact@v4
