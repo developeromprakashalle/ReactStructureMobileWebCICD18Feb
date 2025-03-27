@@ -172,7 +172,7 @@ jobs:
             export GOOGLE_APPLICATION_CREDENTIALS="$HOME/firebase-key.json"
           
             npx firebase appdistribution:distribute android/app/build/outputs/apk/release/app-release.apk \
-                --app ${{ secrets.FIREBASE_APP_ID }} \
+                --app "${{ secrets.FIREBASE_APP_ID }}" \
                 --release-notes "New update available" \
                 --groups development
 
