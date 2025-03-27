@@ -150,8 +150,9 @@ jobs:
         run: |
           curl https://sdk.cloud.google.com | bash
           exec -l $SHELL
-          gcloud --version
           gcloud components install firebase
+          gcloud components install app-distribution
+          gcloud components update
 
       - name: Authenticate with Google Cloud
         run: |
@@ -165,13 +166,11 @@ jobs:
     
       - name: Upload APK to Firebase App Distribution
         run: |
-            gcloud firebase appdistribution releases distribute \
-            android/app/build/outputs/apk/release/app-release.apk \
-            --app ${{ secrets.FIREBASE_APP_ID }} \
-            --release-notes "New version available!" \
-            --groups testers
+            npx firebase appdistribution:distribute android/app/build/outputs/apk/release/app-release.apk \
+            --app 1:986771866945:android:d2ff46120a0369b2b68dc0 \
+            --release-notes "New update available" \
+            --groups development
         
-
       # - name: Verify Firebase Authentication
       #   run: |
       #     npx firebase-tools projects:list
