@@ -169,10 +169,13 @@ jobs:
     
       - name: Upload APK to Firebase App Distribution
         run: |
+            export GOOGLE_APPLICATION_CREDENTIALS="$HOME/firebase-key.json"
+          
             npx firebase appdistribution:distribute android/app/build/outputs/apk/release/app-release.apk \
-            --app 1:986771866945:android:d2ff46120a0369b2b68dc0 \
-            --release-notes "New update available" \
-            --groups development
+                --app 1:986771866945:android:d2ff46120a0369b2b68dc0 \
+                --release-notes "New update available" \
+                --groups development
+          
         
       # - name: Verify Firebase Authentication
       #   run: |
