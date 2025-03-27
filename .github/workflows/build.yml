@@ -159,9 +159,9 @@ jobs:
           gcloud auth activate-service-account --key-file=$HOME/firebase-key.json
           gcloud config set project ${{ secrets.FIREBASE_APP_ID }}
 
-      - name: Verify Firebase Apps
-        run: |
-          npx firebase-tools apps:list --project ${{ secrets.FIREBASE_APP_ID }}
+     # - name: Verify Firebase Apps
+     #   run: |
+     #     npx firebase-tools apps:list --project ${{ secrets.FIREBASE_APP_ID }}
     
       - name: Upload APK to Firebase App Distribution
         run: |
