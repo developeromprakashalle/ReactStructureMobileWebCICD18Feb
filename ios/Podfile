@@ -13,18 +13,15 @@ prepare_react_native_project!
 linkage = ENV['USE_FRAMEWORKS']
 if linkage != nil
   Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".green
-  #use_frameworks! :linkage => linkage.to_sym
+  use_frameworks! :linkage => linkage.to_sym
 end
 
 target 'adbReactMIB' do
   config = use_native_modules!
 
-  pod 'Firebase/Core', :modular_headers => true
-  pod 'Firebase/AppDistribution', :modular_headers => true
-  pod 'Firebase/Analytics', :modular_headers => true
-  pod 'Firebase/Crashlytics', :modular_headers => true
-  pod 'GoogleUtilities', :modular_headers => true
-  pod 'Firebase/Installations'
+  pod 'Firebase/Core'
+  pod 'Firebase/Analytics'
+  pod 'Firebase/AppDistribution'
 
 
   use_react_native!(
