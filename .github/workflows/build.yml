@@ -174,7 +174,7 @@ jobs:
           npx firebase appdistribution:distribute android/app/build/outputs/apk/release/app-release.apk \
               --app "${{ secrets.FIREBASE_APP_ID }}" \
               --release-notes "New update available" \
-              --groups development
+              --groups UAT
 
       - name: Upload APK & AAB Artifacts
         uses: actions/upload-artifact@v4
