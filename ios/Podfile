@@ -1,11 +1,9 @@
-# Resolve react_native_pods.rb with node to allow for hoisting
-require Pod::Executable.execute_command('node', ['-p',
-  'require.resolve(
-    "react-native/scripts/react_native_pods.rb",
-    {paths: [process.argv[1]]},
-  )', __dir__]).strip
+require_relative '../node_modules/react-native/scripts/react_native_pods'
+require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
+$RNFirebaseAsStaticFramework = true
 
-platform :ios, min_ios_version_supported
+platform :ios, '16.0'
+
 prepare_react_native_project!
 
 linkage = ENV['USE_FRAMEWORKS']
@@ -15,21 +13,33 @@ if linkage != nil
 end
 
 target 'adbReactMIB' do
+  use_frameworks!
   config = use_native_modules!
 
+  # Firebase dependencies
+  pod 'Firebase/Core', :modular_headers => true
+  pod 'Firebase/Analytics', :modular_headers => true
+  pod 'Firebase/AppDistribution', :modular_headers => true
+
+  # React Native dependencies
   use_react_native!(
     :path => config[:reactNativePath],
-    # An absolute path to your application root.
+    :hermes_enabled => true, # Enable Hermes
+    :fabric_enabled => false, # Disable Fabric if not used
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
   post_install do |installer|
-    # https://github.com/facebook/react-native/blob/main/packages/react-native/scripts/react_native_pods.rb#L197-L202
     react_native_post_install(
       installer,
-      config[:reactNativePath],
-      :mac_catalyst_enabled => false,
-      # :ccache_enabled => true
+      :mac_catalyst_enabled => false
     )
+
+    # Fix for Xcode 14+ and arm64 simulators
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |config|
+        config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
+      end
+    end
   end
 end
