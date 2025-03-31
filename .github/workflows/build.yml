@@ -249,17 +249,43 @@ jobs:
           -archivePath ${{ github.workspace }}/build/adbReactMIB.xcarchive \
           -exportPath build/export \
           -exportOptionsPlist exportOptions.plist
+    
+          - name: Install Firebase CLI
+          run: npm install -g firebase-tools
+  
+    - name: Install Google Cloud SDK
+      run: |
+            curl https://sdk.cloud.google.com | bash
+            exec -l $SHELL
+            gcloud components install firebase
+            gcloud components install app-distribution
+            gcloud components update
+  
+    - name: Authenticate with Google Cloud
+      run: |
+            echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}' > $HOME/firebase-key.json
+            gcloud auth activate-service-account --key-file=$HOME/firebase-key.json
+            gcloud config set project ${{ secrets.FIREBASE_PROJECT_ID }}
+  
+            # Set the Google credentials environment variable for Firebase CLI
+            export GOOGLE_APPLICATION_CREDENTIALS="$HOME/firebase-key.json"
+  
+            # Verify authentication
+            gcloud auth list
+            firebase projects:list
 
     - name: Authenticate with Google Cloud
       run: |
-        echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}' > $HOME/firebase-key.json
-        gcloud auth activate-service-account --key-file=$HOME/firebase-key.json
-        gcloud config set project ${{ secrets.FIREBASE_PROJECT_ID }}
-
-        export GOOGLE_APPLICATION_CREDENTIALS="$HOME/firebase-key.json"
-
-        gcloud auth list
-        firebase projects:list
+            echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}' > $HOME/firebase-key.json
+            gcloud auth activate-service-account --key-file=$HOME/firebase-key.json
+            gcloud config set project ${{ secrets.FIREBASE_PROJECT_ID }}
+    
+            # Set the Google credentials environment variable for Firebase CLI
+            export GOOGLE_APPLICATION_CREDENTIALS="$HOME/firebase-key.json"
+    
+            # Verify authentication
+            gcloud auth list
+            firebase projects:list
 
     - name: Upload iOS IPA to Firebase App Distribution
       run: |
