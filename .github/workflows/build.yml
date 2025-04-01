@@ -175,6 +175,7 @@ jobs:
               --app "${{ secrets.FIREBASE_APP_ID }}" \
               --release-notes "New update available" \
               --groups UAT
+#development
 
       - name: Upload APK & AAB Artifacts
         uses: actions/upload-artifact@v4
@@ -282,7 +283,8 @@ jobs:
         npx firebase appdistribution:distribute ios/build/export/adbReactMIB.ipa \
           --app "${{ secrets.FIREBASE_IOS_APP_ID }}" \
           --release-notes "New iOS version available!" \
-          --groups development
+          --groups UAT
+      #development
 
     - name: Upload iOS Build Artifact
       uses: actions/upload-artifact@v4
