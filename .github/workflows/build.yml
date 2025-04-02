@@ -28,13 +28,13 @@ on:
         options:
           - apk
           - aab
-      AndroidVersionCode:
-        description: 'Android App version (e.g 100)'
+      AndroidVersionName:
+        description: 'Android App version name is the actual user facing version of the Android app (e.g 1.2.3)'
         required: true
-        default: '1'
-        type: number
+        default: '1.0.0'
+        type: string
       IOSAppVersion:
-        description: 'iOS app version is the actual user facing version of the app (e.g 1.2.3)'
+        description: 'iOS app version is the actual user facing version of the iOS app (e.g 1.2.3)'
         required: true
         default: '1.0.0'
         type: string
@@ -144,7 +144,7 @@ jobs:
 
       - name: Set Android Version
         run: |
-          sed -i "s/versionCode=[0-9]\+/versionCode=${{ github.event.inputs.AndroidVersionCode }}/" android/gradle.properties
+          sed -i "s/versionCode=[0-9]\+/versionCode=${{ github.event.inputs.BuildVersion }}/" android/gradle.properties
           sed -i "s/versionName=.*/versionName=${{ github.event.inputs.BuildVersion }}/" android/gradle.properties
 
       - name: Grant Execute Permission to Gradle Wrapper
