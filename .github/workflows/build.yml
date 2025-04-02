@@ -20,20 +20,28 @@ on:
         options:
           - release
           - debug
+      buildAPKorAAB:
+        description: 'Choose Android build type'
+        required: true
+        default: 'apk'
+        type: choice
+        options:
+          - apk
+          - aab
       AndroidVersionCode:
-        description: 'Android App version'
+        description: 'Android App version (e.g 100)'
         required: true
         default: '1'
         type: number
-      BuildVersion:
-        description: 'Build version'
+      IOSAppVersion:
+        description: 'iOS app version is the actual user facing version of the app (e.g 1.2.3)'
         required: true
         default: '1.0.0'
         type: string
-      IOSBundleVersion:
-        description: 'iOS Bundle version'
+      BuildVersion:
+        description: 'For iOS/Android Build version is internal number that developers use to track individual builds of the app (e.g., 100)'
         required: true
-        default: '1.0.0'
+        default: '1'
         type: string
       WebAppVersion:
         description: 'Web app version'
@@ -136,8 +144,8 @@ jobs:
 
       - name: Set Android Version
         run: |
-          sed -i "s/versionCode=[0-9]\+/versionCode=${{ inputs.AndroidVersionCode }}/" android/gradle.properties
-          sed -i "s/versionName=.*/versionName=${{ inputs.BuildVersion }}/" android/gradle.properties
+          sed -i "s/versionCode=[0-9]\+/versionCode=${{ github.event.inputs.AndroidVersionCode }}/" android/gradle.properties
+          sed -i "s/versionName=.*/versionName=${{ github.event.inputs.BuildVersion }}/" android/gradle.properties
 
       - name: Grant Execute Permission to Gradle Wrapper
         run: chmod +x android/gradlew
@@ -145,11 +153,15 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      - name: Build Android APK & AAB
+      - name: Build Android APK or AAB
         run: |
           cd android
           ./gradlew clean
-          ./gradlew assembleRelease --stacktrace --info --parallel
+          if [ "${{ github.event.inputs.buildAPKorAAB }}" == "apk" ]; then
+            ./gradlew assembleRelease --stacktrace --info --parallel
+          elif [ "${{ github.event.inputs.buildAPKorAAB }}" == "aab" ]; then
+            ./gradlew bundleRelease --stacktrace --info --parallel
+          fi
 
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
@@ -182,15 +194,19 @@ jobs:
           npx firebase appdistribution:distribute android/app/build/outputs/apk/release/app-release.apk \
               --app "${{ secrets.FIREBASE_APP_ID }}" \
               --release-notes "New update available" \
-              --groups ${{ inputs.FirebaseTesterGroup }}
+              --groups ${{ github.event.inputs.FirebaseTesterGroup }}
 
-      - name: Upload APK & AAB Artifacts
+      - name: Upload APK & AAB Artifacts 
         uses: actions/upload-artifact@v4
         with:
-          name: ReactNative-Android-Build-${{ inputs.buildType }}
+          name: ReactNative-Android-Build-${{ github.event.inputs.buildType }}
           path: |
-            android/app/build/outputs/apk/${{ inputs.buildType }}/app-${{ inputs.buildType }}.apk
-          #android/app/build/outputs/bundle/${{ inputs.buildType }}/app-${{ inputs.buildType }}.aab
+            if [ "${{ github.event.inputs.buildAPKorAAB }}" == "apk" ]; then
+            android/app/build/outputs/apk/${{ github.event.inputs.buildType }}/app-${{ github.event.inputs.buildType }}.apk
+            elif [ "${{ github.event.inputs.buildAPKorAAB }}" == "aab" ]; then 
+            android/app/build/outputs/bundle/${{ github.event.inputs.buildType }}/app-${{ github.event.inputs.buildType }}.aab
+            fi
+          retention-days: 10
 
   build-ios:
     needs: setupEnv
@@ -206,6 +222,11 @@ jobs:
       with:
         name: reactnative-workspace
         path: .
+
+    - name: Update Info.plist with App Version
+      run: |
+          plutil -replace CFBundleShortVersionString -string ${{ github.event.inputs.IOSAppVersion }} ios/adbReactMIB/Info.plist
+          plutil -replace CFBundleVersion -string ${{ github.event.inputs.BuildVersion }} ios/adbReactMIBApp/Info.plist
 
     - name: Install Dependencies
       run: |
@@ -290,7 +311,7 @@ jobs:
         npx firebase appdistribution:distribute ios/build/export/adbReactMIB.ipa \
           --app "${{ secrets.FIREBASE_IOS_APP_ID }}" \
           --release-notes "New iOS version available!" \
-          --groups ${{ inputs.FirebaseTesterGroup }}
+          --groups ${{ github.event.inputs.FirebaseTesterGroup }}
 
     - name: Upload iOS Build Artifact
       uses: actions/upload-artifact@v4
@@ -322,7 +343,7 @@ jobs:
       - name: Update Web App Version
         run: |
           cd web
-          NEW_VERSION=${{ inputs.WebAppVersion }}
+          NEW_VERSION=${{ github.event.inputs.WebAppVersion }}
           jq --arg ver "$NEW_VERSION" '.version = $ver' package.json > temp.json && mv temp.json package.json
           echo "Updated package.json version to $NEW_VERSION"
 
@@ -341,11 +362,11 @@ jobs:
       # Build Docker Image
       - name: Build Docker Image
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/reactnative-web:${{ inputs.WebAppVersion }} .
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/reactnative-web:${{ github.event.inputs.WebAppVersion }} .
 
       - name: Push Docker Image
         run: |
-          docker push ${{ secrets.DOCKER_USERNAME }}/reactnative-web:${{ inputs.WebAppVersion }}
+          docker push ${{ secrets.DOCKER_USERNAME }}/reactnative-web:${{ github.event.inputs.WebAppVersion }}
 
       - name: Upload Web Build
         uses: actions/upload-artifact@v4
