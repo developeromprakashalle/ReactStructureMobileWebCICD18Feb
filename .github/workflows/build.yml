@@ -21,7 +21,7 @@ on:
           - release
           - debug
       buildAPKorAAB:
-        description: 'Choose Android build type'
+        description: 'Choose Android or AAB build type'
         required: true
         default: 'apk'
         type: choice
