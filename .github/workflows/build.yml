@@ -223,10 +223,14 @@ jobs:
         name: reactnative-workspace
         path: .
 
+    - name: Debug iOS Info.plist Path
+      run: find ios -name "Info.plist"
+
     - name: Update Info.plist with App Version
       run: |
-          plutil -replace CFBundleShortVersionString -string ${{ github.event.inputs.IOSAppVersion }} ios/adbReactMIB/Info.plist
-          plutil -replace CFBundleVersion -string ${{ github.event.inputs.BuildVersion }} ios/adbReactMIBApp/Info.plist
+          cd ios
+          plutil -replace CFBundleShortVersionString -string ${{ github.event.inputs.IOSAppVersion }} adbReactMIB/Info.plist
+          plutil -replace CFBundleVersion -string ${{ github.event.inputs.BuildVersion }} adbReactMIB/Info.plist
 
     - name: Install Dependencies
       run: |
