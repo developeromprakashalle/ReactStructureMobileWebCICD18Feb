@@ -145,7 +145,7 @@ jobs:
       - name: Set Android Version
         run: |
           sed -i "s/versionCode=[0-9]\+/versionCode=${{ github.event.inputs.BuildVersion }}/" android/gradle.properties
-          sed -i "s/versionName=.*/versionName=${{ github.event.inputs.BuildVersion }}/" android/gradle.properties
+          sed -i "s/versionName=.*/versionName=${{ github.event.inputs.AndroidVersionName }}/" android/gradle.properties
 
       - name: Grant Execute Permission to Gradle Wrapper
         run: chmod +x android/gradlew
