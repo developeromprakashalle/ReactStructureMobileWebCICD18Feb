@@ -49,6 +49,14 @@ on:
           - DEV
           - UAT
           - PROD
+      FirebaseTesterGroup:
+        description: 'Tester group for Firebase App Distribution'
+        required: true
+        default: 'UAT'
+        type: choice
+        options:
+          - UAT
+          - DEV
 
 jobs:
   setupEnv:
@@ -174,8 +182,7 @@ jobs:
           npx firebase appdistribution:distribute android/app/build/outputs/apk/release/app-release.apk \
               --app "${{ secrets.FIREBASE_APP_ID }}" \
               --release-notes "New update available" \
-              --groups UAT
-#development
+              --groups ${{ inputs.FirebaseTesterGroup }}
 
       - name: Upload APK & AAB Artifacts
         uses: actions/upload-artifact@v4
@@ -283,8 +290,7 @@ jobs:
         npx firebase appdistribution:distribute ios/build/export/adbReactMIB.ipa \
           --app "${{ secrets.FIREBASE_IOS_APP_ID }}" \
           --release-notes "New iOS version available!" \
-          --groups UAT
-      #development
+          --groups ${{ inputs.FirebaseTesterGroup }}
 
     - name: Upload iOS Build Artifact
       uses: actions/upload-artifact@v4
